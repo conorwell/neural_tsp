@@ -29,7 +29,6 @@ def update_pos(prev_pos, vel):
 def update_vel(prev_vel, prev_pos, pbest, gbest, w, c1, c2): 
     r1 = np.random.random()
     r2 = np.random.random()
-
     return w*prev_vel + (c1*r1*(pbest - prev_pos)) + (c2*r2*(gbest - prev_pos))
 
 def pso(distances, n_particles, w=.5, c1=1, c2=0.3): 
@@ -40,17 +39,17 @@ def pso(distances, n_particles, w=.5, c1=1, c2=0.3):
     # initialize random positions and velocities
     positions = torch.rand(n_particles, distances.shape[0])
     velocities = torch.rand(n_particles, distances.shape[0]) * 2 - 1
-    print(velocities)
     count = 0
 
     # softmax all the positions
     positions = torch.nn.functional.softmax(positions, dim=1)
 
     # initialize pbest and gbest
-    pbest = fitness(distances, positions[0])
-    gbest = fitness(distances, positions[0])
-    gbest_pos = positions[0]
-    count += 2
+    pbests = torch.tensor([fitness(distances, pos) for pos in positions])
+    gbest_idx = torch.argmin(pbests).item()
+    gbest = pbests[gbest_idx].item()
+    gbest_pos = positions[gbest_idx, :]
+    count += positions.shape[0]
 
     # neural net goes here?
 
@@ -60,12 +59,13 @@ def pso(distances, n_particles, w=.5, c1=1, c2=0.3):
         # loop thru each particle
         for j in range(n_particles): 
 
-            prev_pos = positions[j]
-            prev_vel = velocities[j]           
+            prev_pos = positions[j, :]
+            prev_vel = velocities[j, :]           
 
-            # update velocity
-            vel = update_vel(prev_vel, prev_pos, pbest, gbest, w, c1, c2)
+            # update velocity and keep within a range
+            vel = update_vel(prev_vel, prev_pos, pbests[j], gbest, w, c1, c2)
             velocities[j, :] = vel
+            velocities = torch.clamp(velocities, min=-500, max=500)
 
             # update position
             pos = update_pos(prev_pos, vel)
@@ -77,13 +77,15 @@ def pso(distances, n_particles, w=.5, c1=1, c2=0.3):
             count += 1
 
             # update pbest if needed
-            if fpos < pbest: 
-                pbest = fpos
+            if fpos < pbests[j]: 
+                pbests[j] = fpos
 
             # update gbest if needed
             if fpos < gbest: 
                 gbest = fpos
                 gbest_pos = pos
+
+            print(pos)
 
     return {"sequence": gbest_pos, "func_evals": count, "parameters": (n_particles, w, c1,c2)}
 
@@ -91,11 +93,13 @@ def pso(distances, n_particles, w=.5, c1=1, c2=0.3):
 def main(): 
     
    matrix = np.array([[0,15,2,34,1],[15,0,48,2,17],[2,48,0,22,39],[34,2,22,0,3],[1,17,39,3,0]])
-   distances = torch.Tensor(matrix)
+   distances = torch.tensor(matrix)
    
-   solution= pso(distances, 10, 0.8, 1, 1)
+   solution = pso(distances, 10, 2, 2, 3)
+   print(fitness(distances, solution["sequence"]))
    print(pos_to_route(solution["sequence"]))
-   print(fitness(distances, solution["sequence"]).item())
 
 if __name__ == "__main__": 
     main()
+
+# often converges prematurely
