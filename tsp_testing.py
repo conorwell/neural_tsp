@@ -100,6 +100,7 @@ class StandardAntColonyOptimizer:
         for i in range(len(solution) - 1):
             distance += self.distance_matrix[solution[i]][solution[i + 1]]
         distance += self.distance_matrix[solution[-1]][solution[0]]  # Return to start
+        self.func_evals += 1
         return distance
 
     def generate_training_data_using_aco(self, num_iterations=50):
@@ -213,7 +214,7 @@ def compute_distance_matrix(coordinates):
             else:
                 distance_matrix[i][j] = np.inf  # To avoid self-loop in path
     return distance_matrix
-
+'''
 def getData(technique, problem):
     start = time.time()
 
@@ -294,6 +295,8 @@ fig = plt.figure(figsize=(10, 7))
 (figs[0], figs[1], figs[2]) = fig.subfigures(3, 1)
 plt.show()
 
+'''
+
 def sortedTechnique(e_matrix):
     res = torch.tensor(range(e_matrix.shape[0]+1))
     func_evals = 0
@@ -360,4 +363,5 @@ torch.manual_seed(42)
 # Generate random coordinates for nodes
 coordinates = np.random.rand(20, 2)  # 2D coordinates
 distance_matrix = compute_distance_matrix(coordinates)
-aco(distance_matrix)
+result = aco(distance_matrix)
+print(result)
