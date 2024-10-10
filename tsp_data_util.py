@@ -1,6 +1,7 @@
 import tsplib95 as tsp
 import numpy as np
 import os
+import torch
 
 optimal_tour_distance = {
 'a280' : 2579,
@@ -122,7 +123,7 @@ def generate_edge_weight_matrix(tsp_file):
     problem = tsp.load(tsp_file)
     num_nodes = problem.dimension
     # Create an edge weight matrix
-    weight_matrix = np.zeros((num_nodes, num_nodes))
+    weight_matrix = torch.zeros((num_nodes, num_nodes))
 
     for i, node1 in enumerate(problem.get_nodes()):
         for j, node2 in enumerate(problem.get_nodes()):
@@ -131,7 +132,7 @@ def generate_edge_weight_matrix(tsp_file):
     return weight_matrix
 
 def get_optimal_tour(tsp_file):
-    '''return the optimal solution of a tsp file (IF IT EXISTS)
+    '''return the optimal tour of a tsp file (IF IT EXISTS) as a tensor
     otherwise return [] and print "no optimal solution file exists"'''
     split_path = tsp_file.split(".")
 
@@ -142,17 +143,17 @@ def get_optimal_tour(tsp_file):
     opt_solution_path = split_path[0] + ".opt.tour"
     if os.path.exists(opt_solution_path): #when there is a solution
         solution = tsp.load(opt_solution_path)
-        return solution.tours[0]
+        return torch.tensor(solution.tours[0])
     else: #when there is no solution file
         print("no solution file exists for the given tsp problem")
         return []
 
 
 def get_tour_length(tsp_file, tour):
-    ''' Given a tour, get the length of following the sequence
+    ''' Given a tour(a tensor), get the length of following the sequence
     Note: a tour needs to be in the format of [[tour]] not [tour]'''
     p = tsp.load(tsp_file)
-    return p.trace_tours([tour])[0]
+    return p.trace_tours([tour.tolist()])[0]
 
 def get_optimal_tour_length(tsp_file):
     '''get the optimal tour length of a given tsp file'''
