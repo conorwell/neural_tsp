@@ -145,20 +145,31 @@ def get_optimal_tour(tsp_file):
         solution = tsp.load(opt_solution_path)
         return torch.tensor(solution.tours[0])
     else: #when there is no solution file
-        print("no solution file exists for the given tsp problem")
+        print("no solution tour file exists for: ", tsp_file, " every tsp file has a opt tour length")
         return []
 
 
 def get_tour_length(tsp_file, tour):
     ''' Given a tour(a tensor), get the length of following the sequence
-    Note: a tour needs to be in the format of [[tour]] not [tour]'''
+    Note: a tour needs to be in the format of [[tour]] not [tour]
+    Usage: not for optimal tour length. Use to get length of optimization algorithm output.'''
+    
     p = tsp.load(tsp_file)
-    return p.trace_tours([tour.tolist()])[0]
+    nodes = list(p.get_nodes())
+
+    # some problems have nodes 0 to n, others have nodes 1 to n.
+    # handle this.
+    tour = tour.tolist()
+    if 0 not in tour and 0 in nodes:
+        tour = [x - 1 for x in tour]
+    
+    return p.trace_tours([tour])[0]
 
 def get_optimal_tour_length(tsp_file):
-    '''get the optimal tour length of a given tsp file'''
-    split = tsp_file.split('.')
-    problem_name = split[0]
+    '''get the optimal tour length of a given tsp file
+        Usage: when trying to get an optimal tour length and NOT any other tour length'''
+    #split = tsp_file.split('.')
+    problem_name = tsp_file.split('/')[-1].split('.')[0]
     return optimal_tour_distance[problem_name]
 
 
