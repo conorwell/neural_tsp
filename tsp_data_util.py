@@ -162,6 +162,8 @@ def get_tour_length(tsp_file, tour):
     tour = tour.tolist()
     if 0 not in tour and 0 in nodes:
         tour = [x - 1 for x in tour]
+    elif 0 not in nodes and 0 in tour:
+        tour = [x + 1 for x in tour]
     
     return p.trace_tours([tour])[0]
 
