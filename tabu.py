@@ -41,7 +41,7 @@ def alter(path):
             alteredlist.append(alteredpath)
     return alteredlist
 
-def tabu_search(mat, max_iters, tabu_list_size, initial):
+def tabu_search(mat, max_iters, tabu_list_size, initial, worsening_thresh=1.01):
     bestpath = initial
     perm_list = []
     bestfit = fitness(mat, bestpath)
@@ -59,7 +59,7 @@ def tabu_search(mat, max_iters, tabu_list_size, initial):
                     perm_list.append(newpath)
                     continue
                 # need to tune accept condition
-                elif newfit <= bestfit * 1.01:
+                elif newfit <= bestfit * worsening_thresh:
                     bestpath = newpath
                     bestfit = newfit
                 # worse path is found
@@ -69,6 +69,8 @@ def tabu_search(mat, max_iters, tabu_list_size, initial):
                     tabu_list.append(newpath)
                     continue
     bestpath.append(bestpath[0])
-    return bestpath
+    #return bestpath
+    params = {'tabu_list_size': tabu_list_size, 'max_iterations': max_iters, 'worsening_threshold': worsening_thresh}
+    return {'func_evals': max_iters, 'sequence': bestpath, 'parameters':params}
 
-tabu_search(arr, 1, 6, path)
+print(tabu_search(arr, 1, 6, path))
