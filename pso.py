@@ -6,11 +6,10 @@ def fitness(distances, pos):
     returns the total length of the tour
     """
     total_length = 0
-
     pos = pos_to_route(pos)
 
     for i in range(len(pos) - 1):
-        total_length += distances[pos[i], pos[i+1]]
+        total_length += distances[pos[i], pos[i+1]].item()
 
     return total_length
 
@@ -21,81 +20,94 @@ def pos_to_route(pos):
 
     # turn pos into a route
     pos = sorted(identity, key=lambda x: pos[x])
+    pos = torch.tensor(pos)
     return pos
 
-def update_pos(prev_pos, vel): 
-    return prev_pos + vel
+def update_pos(positions, velocities): 
+    return positions + velocities
 
-def update_vel(prev_vel, prev_pos, pbest, gbest, w, c1, c2): 
-    r1 = np.random.random()
-    r2 = np.random.random()
+def update_vel(distances, velocities, positions, pbests_pos, gbest_pos, w, c1, c2): 
 
-    return w*prev_vel + (c1*r1*(pbest - prev_pos)) + (c2*r2*(gbest - prev_pos))
+    r1 = torch.rand(distances.shape[0])
+    r2 = torch.rand(distances.shape[0])
 
-def pso(distances, n_particles=10, w=.5, c1=1, c2=0.3): 
+    # possibly loses some pbest info
+    return w*velocities + (c1*r1*(pbests_pos - positions)) + (c2*r2*(gbest_pos - positions))
+
+def pso(distances, n_particles=25, w=0.9, c1=0.5, c2=0.5, stagnation_limit=50): 
     """
     performs pso
     """
 
     # initialize random positions and velocities
-    positions = torch.rand(n_particles, distances.shape[0])
+    positions = torch.rand(n_particles, distances.shape[0]) * 2 - 1
     velocities = torch.rand(n_particles, distances.shape[0]) * 2 - 1
-    print(velocities)
-    count = 0
+    
+    # initialize fitnesses
+    fitnesses = torch.Tensor([fitness(distances, pos) for pos in positions])
+    count = positions.shape[0] # initialize fitness function call count
 
-    # softmax all the positions
-    positions = torch.nn.functional.softmax(positions, dim=1)
+    # initialize pbests
+    pbests = fitnesses.clone()
+    pbests_pos = positions.clone()
 
-    # initialize pbest and gbest
-    pbest = fitness(distances, positions[0])
-    gbest = fitness(distances, positions[0])
-    gbest_pos = positions[0]
-    count += 2
+    # initialize gbest
+    gbest_idx = torch.argmin(pbests).item()
+    gbest = pbests[gbest_idx].item()
+    gbest_pos = pbests_pos.clone()[gbest_idx, :]
 
-    # neural net goes here?
+    # initialize stagnation count 
+    stagnation_count = 0
 
     # perform pso iterations
-    for i in range(100): 
+    for _ in range(1000): 
 
-        # loop thru each particle
-        for j in range(n_particles): 
+        # update velocities and keep within a range
+        velocities = update_vel(distances, positions, velocities, pbests_pos, gbest_pos, w, c1, c2)
+        velocities = torch.nn.functional.softmax(velocities, dim=1)
+        # velocities = torch.clamp(velocities, min=-500, max=500)
 
-            prev_pos = positions[j]
-            prev_vel = velocities[j]           
+        # update positions
+        positions = update_pos(positions, velocities)
 
-            # update velocity
-            vel = update_vel(prev_vel, prev_pos, pbest, gbest, w, c1, c2)
-            velocities[j, :] = vel
+        # calculate fitnesses
+        fitnesses = torch.Tensor([fitness(distances, pos) for pos in positions])
+        count += positions.shape[0] # increment fitness function call count
 
-            # update position
-            pos = update_pos(prev_pos, vel)
-            pos = torch.nn.functional.softmax(pos, dim=0)
-            positions[j, :] = pos
+        # update pbest if needed
+        pbests = torch.where(fitnesses < pbests, fitnesses, pbests)
+        pbests_pos = torch.where(fitnesses.reshape(n_particles, 1) < pbests.reshape(n_particles, 1), positions, pbests_pos)
 
-            # calculate fitness
-            fpos = fitness(distances, pos)
-            count += 1
+        # update gbest if needed
+        min_fitnesses_idx = torch.argmin(fitnesses).item()
+        min_fitness = fitnesses[min_fitnesses_idx].item()
+        if min_fitness < gbest:
+            gbest = min_fitness
+            gbest_pos = positions.clone()[min_fitnesses_idx, :]
+            stagnation_count = 0
+        else: 
+            stagnation_count += 1
 
-            # update pbest if needed
-            if fpos < pbest: 
-                pbest = fpos
+        if stagnation_count >= stagnation_limit:
+            print("Stopped for stagnation!")
+            break
 
-            # update gbest if needed
-            if fpos < gbest: 
-                gbest = fpos
-                gbest_pos = pos
+        # print(pos_to_route(gbest_pos), "GBEST")
+        # for pos in positions: 
+        #     print(pos_to_route(pos))
 
-    return {"sequence": gbest_pos, "func_evals": count, "parameters": (n_particles, w, c1,c2)}
+    return {"gbest": gbest, "sequence": pos_to_route(gbest_pos), "func_evals": count, "parameters": {"n_particles": n_particles, "w": w, "c1": c1, "c2": c2}}
 
 
 def main(): 
-    
-   matrix = np.array([[0,15,2,34,1],[15,0,48,2,17],[2,48,0,22,39],[34,2,22,0,3],[1,17,39,3,0]])
+
+   matrix = np.array([[0,10,5,20,6,32,6,14],[10,0,6,2,31,5,18,1],[5,6,0,10,4,21,6,37],[20,2,10,0,9,10,7,16],[6,31,4,9,0,26,5,39],[32,5,21,10,26,0,3,21],[6,18,6,7,5,3,0,47],[14,1,37,16,39,21,47,0]])
    distances = torch.Tensor(matrix)
    
-   solution= pso(distances, 10, 0.8, 1, 1)
-   print(pos_to_route(solution["sequence"]))
-   print(fitness(distances, solution["sequence"]).item())
+   solution = pso(distances, 200, .2, 1, 3)
+   print("Best found route:", solution["sequence"])
+   print("Route distances:", solution["gbest"])
+   print("Fitness function evals:", solution["func_evals"])
 
 if __name__ == "__main__": 
     main()

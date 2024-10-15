@@ -1,11 +1,18 @@
-import aco
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import matplotlib.pyplot as plt
 import random
 import time
+import tsp_data_util as tsp_data_util
+import tsplib95
+import torch
+import time
+import matplotlib.pyplot as plt
+import seaborn as sns
+import torch.nn as nn
+import torch.optim as optim
+import gc
+import os
+
 
 class StandardAntColonyOptimizer:
     def __init__(self, num_nodes, distance_matrix, num_ants=20, alpha=1.0, beta=2.0, evaporation_rate=0.5, Q=100,
@@ -24,7 +31,7 @@ class StandardAntColonyOptimizer:
         """
         self.num_nodes = num_nodes
         self.distance_matrix = distance_matrix
-        self.pheromone = np.ones((num_nodes, num_nodes))
+        self.pheromone = torch.ones((num_nodes, num_nodes))
         self.num_ants = num_ants
         self.alpha = alpha  # Pheromone importance
         self.beta = beta    # Heuristic importance
@@ -45,28 +52,46 @@ class StandardAntColonyOptimizer:
         solution = []
         visited = set()
         current_node = np.random.randint(0, self.num_nodes)
+        #print(current_node)
         solution.append(current_node)
         visited.add(current_node)
         while len(visited) < self.num_nodes:
             pheromone = self.pheromone[current_node]
             heuristic = 1 / (self.distance_matrix[current_node] + 1e-6)
             heuristic[heuristic == np.inf] = 0
+            #print(self.alpha, self.beta)
+            #print('alpha', pheromone ** self.alpha, 'beta', heuristic ** self.beta)
 
             combined = (pheromone ** self.alpha) * (heuristic ** self.beta)
             for node in visited:
                 combined[node] = 0  # Exclude visited nodes
-            total = np.sum(combined)
+            total = torch.sum(combined)
             if total == 0:
-                probabilities = np.ones(self.num_nodes)
+                probabilities = torch.ones(self.num_nodes)
                 probabilities[list(visited)] = 0
-                probabilities /= np.sum(probabilities)
+                probabilities /= torch.sum(probabilities)
             else:
                 probabilities = combined / total
-            next_node = np.random.choice(range(self.num_nodes), p=probabilities)
+
+            nodes = torch.arange(self.num_nodes)
+
+            # Convert probabilities to a PyTorch tensor if it isn't already
+            probabilities_tensor = torch.tensor(probabilities, dtype=torch.float32)
+            # Normalize probabilities if they don't sum to 1 (just in case)
+            probabilities_tensor = probabilities_tensor / probabilities_tensor.sum()
+            # Use torch.multinomial to sample from the nodes based on probabilities
+            next_node_index = torch.multinomial(probabilities_tensor, 1)  # Sample one node
+            # Get the actual node index
+            next_node = nodes[next_node_index.item()].item()
+
+            #Get the chosen values
+            #chosen_values = choices[chosen_indices]
+
+            #next_node = np.random.choice(range(self.num_nodes), p=probabilities)
             solution.append(next_node)
             visited.add(next_node)
             current_node = next_node
-        return solution
+        return torch.tensor(solution)
 
     def update_pheromone(self, solutions, distances):
         """
@@ -98,8 +123,8 @@ class StandardAntColonyOptimizer:
         """
         distance = 0
         for i in range(len(solution) - 1):
-            distance += self.distance_matrix[solution[i]][solution[i + 1]]
-        distance += self.distance_matrix[solution[-1]][solution[0]]  # Return to start
+            distance += self.distance_matrix[solution[i],solution[i + 1]]
+        distance += self.distance_matrix[solution[-1], solution[0]]  # Return to start
         self.func_evals += 1
         return distance
 
@@ -130,7 +155,7 @@ class StandardAntColonyOptimizer:
                     self.best_solution = solution
             self.update_pheromone(solutions, distances)
             self.best_distances_per_iteration.append(self.best_distance)
-            print(f"Iteration {iteration+1}/{num_iterations}, Best Distance: {self.best_distance:.4f}")
+            #print(f"Iteration {iteration+1}/{num_iterations}, Best Distance: {self.best_distance:.4f}")
             # Collect sequences and pheromone matrices
             sequences.extend(solutions)
             pheromone_matrices.extend(self.solutions_to_pheromone_matrix(solutions))
@@ -150,13 +175,13 @@ class StandardAntColonyOptimizer:
         """
         pheromone_matrices = []
         for solution in solutions:
-            pheromone = np.zeros((self.num_nodes, self.num_nodes))
+            pheromone = torch.zeros((self.num_nodes, self.num_nodes))
             for i in range(len(solution) - 1):
                 from_node = solution[i]
                 to_node = solution[i + 1]
-                pheromone[from_node][to_node] += 1
+                pheromone[from_node, to_node] += 1
             # Complete the tour by connecting last to first node
-            pheromone[solution[-1]][solution[0]] += 1
+            pheromone[solution[-1], solution[0]] += 1
             # Normalize pheromone
             if pheromone.max() > 0:
                 pheromone /= pheromone.max()
@@ -215,16 +240,17 @@ def compute_distance_matrix(coordinates):
                 distance_matrix[i][j] = np.inf  # To avoid self-loop in path
     return distance_matrix
 
+
 def aco(matrix):
     func_evals = 0
     # Parameters
-    num_nodes = 20
+    num_nodes = 4
     num_ants = 20
-    num_iterations = 50
+    num_iterations = 100
 
 
     standard_aco = StandardAntColonyOptimizer(
-        num_nodes=num_nodes,
+        num_nodes=matrix.size(0),
         distance_matrix=matrix,
         num_ants=num_ants,
         alpha=1.0,
@@ -238,11 +264,11 @@ def aco(matrix):
               'num_iterations': num_iterations, 'alpha': standard_aco.alpha, 'beta': standard_aco.beta,
               'evaporation_rate': standard_aco.evaporation_rate, 'Q': standard_aco.Q}
 
+    #best_solution_standard, best_distance_standard = standard_aco.optimize(iterations=num_iterations)
+    #print("\nRunning Standard ACO...")
     best_solution_standard, best_distance_standard = standard_aco.optimize(iterations=num_iterations)
-    print("\nRunning Standard ACO...")
-    best_solution_standard, best_distance_standard = standard_aco.optimize(iterations=num_iterations)
-    print(f"\nStandard ACO - Best Distance: {best_distance_standard:.4f}")
-    print(f"Best solution: {best_solution_standard}")
+    #print(f"\nStandard ACO - Best Distance: {best_distance_standard:.4f}")
+    #print(f"Best solution: {best_solution_standard}")
 
     return {'func_evals': standard_aco.func_evals, 'sequence': best_solution_standard, 'parameters':params}
 
