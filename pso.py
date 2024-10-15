@@ -88,7 +88,6 @@ def pso(distances, n_particles, w, c1, c2, stagnation_limit=50):
             stagnation_count += 1
 
         if stagnation_count >= stagnation_limit:
-            print("Stopped for stagnation!")
             break
 
         # print(pos_to_route(gbest_pos), "GBEST")
@@ -103,7 +102,7 @@ def main():
    matrix = np.array([[0,10,5,20,6,32,6,14],[10,0,6,2,31,5,18,1],[5,6,0,10,4,21,6,37],[20,2,10,0,9,10,7,16],[6,31,4,9,0,26,5,39],[32,5,21,10,26,0,3,21],[6,18,6,7,5,3,0,47],[14,1,37,16,39,21,47,0]])
    distances = torch.Tensor(matrix)
    
-   solution = pso(distances, 200, .2, 1, 3)
+   solution = pso(distances, 200, .25, .96, 4.31)
    print("Best found route:", solution["sequence"])
    print("Route distances:", solution["gbest"])
    print("Fitness function evals:", solution["func_evals"])
