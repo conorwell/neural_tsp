@@ -11,6 +11,7 @@ def fitness(distances, pos):
     for i in range(len(pos) - 1):
         total_length += distances[pos[i], pos[i+1]].item()
 
+    total_length += distances[pos[0], pos[-1]].item()
     return total_length
 
 def pos_to_route(pos): 
@@ -20,6 +21,7 @@ def pos_to_route(pos):
 
     # turn pos into a route
     pos = sorted(identity, key=lambda x: pos[x])
+    pos = torch.tensor(pos)
     return pos
 
 def update_pos(positions, velocities): 
