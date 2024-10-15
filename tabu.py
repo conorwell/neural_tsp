@@ -41,7 +41,14 @@ def alter(path):
             alteredlist.append(alteredpath)
     return alteredlist
 
-def tabu_search(mat, max_iters, tabu_list_size, initial, worsening_thresh=1.01):
+def sortedTechnique(e_matrix):
+    res = torch.tensor(range(1,e_matrix.shape[0]+1))
+    return res
+
+def tabu_search(mat, max_iters=100, worsening_thresh=1.01):
+    num_cities = mat.shape[0]
+    tabu_list_size = num_cities * (num_cities-1) / 2
+    initial = sortedTechnique(mat)
     bestpath = initial
     perm_list = []
     bestfit = fitness(mat, bestpath)
@@ -73,4 +80,4 @@ def tabu_search(mat, max_iters, tabu_list_size, initial, worsening_thresh=1.01):
     params = {'tabu_list_size': tabu_list_size, 'max_iterations': max_iters, 'worsening_threshold': worsening_thresh}
     return {'func_evals': max_iters, 'sequence': bestpath, 'parameters':params}
 
-print(tabu_search(arr, 1, 6, path))
+print(tabu_search(arr, 1, 6))
