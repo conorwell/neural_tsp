@@ -1,5 +1,3 @@
-# path = [city1, city3, city4, city2, city1]
-# citylist = [city1, city2, city3, city4]
 import torch
 import numpy as np
 
@@ -13,17 +11,18 @@ arr = [
     [6,1,2,0]
     ]
 
-np.array(arr)
-torch.Tensor(arr)
+arr = np.array(arr)
+arr = torch.Tensor(arr)
 
 # finds fitness of path
 def fitness(mat, path):
     sum = 0
-    newpath = path.copy()
-    newpath.append(path[0])
+    newpath = path.clone()
+    last_node = torch.tensor([path[0]])
+    newpath = torch.cat((newpath, last_node), 0)
     for i in range(len(newpath)-1):
-        start = citylist.index(newpath[i])
-        end = citylist.index(newpath[i+1])
+        start = newpath[i]-1
+        end = newpath[i+1]-1
         if mat[start][end] == 0:
             return 0
         else:
@@ -33,11 +32,12 @@ def fitness(mat, path):
 # creates list of paths 1 swap away from current path
 def alter(path):
     alteredlist = []
-    # print("original path: ",path)
     for i in range(len(path)-1):
         for j in range(i+1, len(path)):
-            alteredpath = path.copy()
-            alteredpath[i], alteredpath[j] = alteredpath[j],alteredpath[i]
+            alteredpath = path.clone()
+            temp = int(alteredpath[i])
+            alteredpath[i] = alteredpath[j]
+            alteredpath[j] = temp
             alteredlist.append(alteredpath)
     return alteredlist
 
@@ -46,7 +46,7 @@ def sortedTechnique(e_matrix):
     return res
 
 def tabu_search(mat, max_iters=100, worsening_thresh=1.01):
-    num_cities = mat.shape[0]
+    num_cities = mat.size(dim = 0)
     tabu_list_size = num_cities * (num_cities-1) / 2
     initial = sortedTechnique(mat)
     bestpath = initial
@@ -58,7 +58,8 @@ def tabu_search(mat, max_iters=100, worsening_thresh=1.01):
         for newpath in altered:
             newfit = fitness(mat, newpath)
             #check if path is in tabulist
-            if newpath in tabu_list or newpath in perm_list:
+            #if newpath in tabu_list or newpath in perm_list:
+            if any([(newpath == short).all() for short in tabu_list]) or any([(newpath == long).all() for long in perm_list]):
                 continue
             else:
                 # bad path is found
@@ -75,9 +76,9 @@ def tabu_search(mat, max_iters=100, worsening_thresh=1.01):
                         tabu_list.pop(0)
                     tabu_list.append(newpath)
                     continue
-    bestpath.append(bestpath[0])
-    #return bestpath
+    last_node = torch.tensor([bestpath[0]])
+    bestpath = torch.cat((bestpath, last_node), 0)
     params = {'tabu_list_size': tabu_list_size, 'max_iterations': max_iters, 'worsening_threshold': worsening_thresh}
     return {'func_evals': max_iters, 'sequence': bestpath, 'parameters':params}
 
-print(tabu_search(arr, 1, 6))
+print(tabu_search(arr))
