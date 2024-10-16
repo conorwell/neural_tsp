@@ -70,7 +70,6 @@ Plots:
 
 Comparison Plots:
 
-Approximation Ratio:
 ![Runtimecomparisons](https://github.com/user-attachments/assets/cea161ab-9df3-4cdb-a1ae-8297abc4043e)
 ![Func_Evalscomparisons](https://github.com/user-attachments/assets/bfdf5bd7-6f17-40a9-abc0-69d6cbdfa49b)
 ![Memorycomparisons](https://github.com/user-attachments/assets/a759f879-86e5-420f-b9fa-8d560c2cf3e5)
