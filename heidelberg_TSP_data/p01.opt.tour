@@ -1,0 +1,21 @@
+NAME : p01.opt.tour
+COMMENT : Optimal solution for p01 (291)
+TYPE : TOUR
+DIMENSION : 15
+TOUR_SECTION
+ 1
+13
+ 2
+15
+ 9
+ 5
+ 7
+ 3
+12
+14
+10
+ 8
+ 6
+ 4
+11
+ -1

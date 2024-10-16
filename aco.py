@@ -1,4 +1,3 @@
-
 import numpy as np
 import torch
 import random
@@ -53,15 +52,15 @@ class StandardAntColonyOptimizer:
         solution = []
         visited = set()
         current_node = np.random.randint(0, self.num_nodes)
-        print(current_node)
+        #print(current_node)
         solution.append(current_node)
         visited.add(current_node)
         while len(visited) < self.num_nodes:
             pheromone = self.pheromone[current_node]
             heuristic = 1 / (self.distance_matrix[current_node] + 1e-6)
             heuristic[heuristic == np.inf] = 0
-            print(self.alpha, self.beta)
-            print('alpha', pheromone ** self.alpha, 'beta', heuristic ** self.beta)
+            #print(self.alpha, self.beta)
+            #print('alpha', pheromone ** self.alpha, 'beta', heuristic ** self.beta)
 
             combined = (pheromone ** self.alpha) * (heuristic ** self.beta)
             for node in visited:
@@ -156,7 +155,7 @@ class StandardAntColonyOptimizer:
                     self.best_solution = solution
             self.update_pheromone(solutions, distances)
             self.best_distances_per_iteration.append(self.best_distance)
-            print(f"Iteration {iteration+1}/{num_iterations}, Best Distance: {self.best_distance:.4f}")
+            #print(f"Iteration {iteration+1}/{num_iterations}, Best Distance: {self.best_distance:.4f}")
             # Collect sequences and pheromone matrices
             sequences.extend(solutions)
             pheromone_matrices.extend(self.solutions_to_pheromone_matrix(solutions))
@@ -266,10 +265,9 @@ def aco(matrix):
               'evaporation_rate': standard_aco.evaporation_rate, 'Q': standard_aco.Q}
 
     #best_solution_standard, best_distance_standard = standard_aco.optimize(iterations=num_iterations)
-    print("\nRunning Standard ACO...")
+    #print("\nRunning Standard ACO...")
     best_solution_standard, best_distance_standard = standard_aco.optimize(iterations=num_iterations)
-    print(f"\nStandard ACO - Best Distance: {best_distance_standard:.4f}")
-    print(f"Best solution: {best_solution_standard}")
+    #print(f"\nStandard ACO - Best Distance: {best_distance_standard:.4f}")
+    #print(f"Best solution: {best_solution_standard}")
 
     return {'func_evals': standard_aco.func_evals, 'sequence': best_solution_standard, 'parameters':params}
-
