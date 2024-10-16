@@ -1,7 +1,6 @@
 # neural_tsp
 A class project for Prof. Scott's Block 2 2024 class, CP341: Deep Learning and Optimization
 
-
 EXPERIMENT:
 
 The goal of this project was to compare different optimization algorithms on solving the Traveling Salesperson Problem. We compiled a set of 29 traveling salesperson problems with a maxmimum size of 666 cities, a minimum size of 15 cities, and an average size of 143 cities. Most of these files were provided by the HeidelBerg TSPLIB. We tested each algorithm on all problems, analyzing the approximation ratio, runtime, distance evaluations, and memory allocation.
@@ -12,7 +11,7 @@ Tabu Search:
 Tabu search is an enhancement on local neighbor search. It keeps track of a list of bad/invalid/visited solutions that it marks as "tabu" and will not check again.
 
 Particle Swarm Optimization:
-
+We implemented a discrete adaptation of particle swarm optimization (pso) to approximate answers for tsp problems. We attempted to find the optimal w, c1, and c2 parameters for our pso implementation by first using coordinate descent with golden section search. After running into convergence issues with this method, we created graphs of each parameter being tweaked across averages of tsp problems while keeping the other parameters constant. 
 
 
 Ant Colony Optimization:
@@ -33,8 +32,6 @@ Average Runtime: 76.8953 seconds
 
 Plots:
 <img width="638" alt="Screenshot 2024-10-15 at 10 05 44 PM" src="https://github.com/user-attachments/assets/800af325-614d-412d-adfb-1c537997e853">
-
-
 
 Particle Swarm Optimization:
 
@@ -83,19 +80,3 @@ Approximation Ratio:
 
 Interpretation:
 From our tests, it can be observed that Ant Colony Optimization is the superior optimization method for the Traveling Salesperson Problem. ACO had the lowest approximation ratio while maintaining a reasonable runtime. Furthermore, Ant Colony Optimization with Transformers demonstrated a similar approximation ratio while reducing runtime.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -271,5 +271,3 @@ def aco(matrix):
     #print(f"Best solution: {best_solution_standard}")
 
     return {'func_evals': standard_aco.func_evals, 'sequence': best_solution_standard, 'parameters':params}
-
-
