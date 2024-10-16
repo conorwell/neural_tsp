@@ -32,6 +32,8 @@ Average Distance Checks: 34,881
 Average Runtime: 76.8953 seconds
 
 Plots:
+<img width="638" alt="Screenshot 2024-10-15 at 10 05 44 PM" src="https://github.com/user-attachments/assets/800af325-614d-412d-adfb-1c537997e853">
+
 
 
 Particle Swarm Optimization:
@@ -42,6 +44,11 @@ Average Distance Checks: 4,020.6896
 Average Runtime: 12.1956 seconds
 
 Plots:
+(with outlier)
+<img width="640" alt="Screenshot 2024-10-15 at 9 30 50 PM" src="https://github.com/user-attachments/assets/a6bf1a30-503d-45df-95fe-91af1db60294">
+
+(outlier removed)
+<img width="636" alt="Screenshot 2024-10-15 at 9 31 03 PM" src="https://github.com/user-attachments/assets/ec84d72f-cb20-4fff-ba0a-d8bcbeb12581">
 
 Ant Colony Optimization:
 
@@ -51,6 +58,7 @@ Average Distance Checks: 2,000 (fixed)
 Average Runtime: 132.67 seconds
 
 Plots:
+<img width="651" alt="Screenshot 2024-10-15 at 9 25 33 PM" src="https://github.com/user-attachments/assets/05882878-6f9b-4509-8363-6986be039dbe">
 
 Ant Colony Optimization with Transformer:
 
@@ -64,6 +72,12 @@ Plots:
 
 
 Comparison Plots:
+
+Approximation Ratio:
+![Runtimecomparisons](https://github.com/user-attachments/assets/cea161ab-9df3-4cdb-a1ae-8297abc4043e)
+![Func_Evalscomparisons](https://github.com/user-attachments/assets/bfdf5bd7-6f17-40a9-abc0-69d6cbdfa49b)
+![Memorycomparisons](https://github.com/user-attachments/assets/a759f879-86e5-420f-b9fa-8d560c2cf3e5)
+![ARcomparisons](https://github.com/user-attachments/assets/71e77d9c-e42c-4c7f-9062-fd93291134b1)
 
 
 
