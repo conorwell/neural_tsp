@@ -56,12 +56,12 @@ def tabu_search(mat, max_iters=100, worsening_thresh=1.01):
     for i in range(max_iters):
         altered = alter(bestpath)
         for newpath in altered:
-            newfit = fitness(mat, newpath)
             #check if path is in tabulist
             #if newpath in tabu_list or newpath in perm_list:
             if any([(newpath == short).all() for short in tabu_list]) or any([(newpath == long).all() for long in perm_list]):
                 continue
             else:
+                newfit = fitness(mat, newpath)
                 # bad path is found
                 if newfit == 0:
                     perm_list.append(newpath)
