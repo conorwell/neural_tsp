@@ -16,18 +16,26 @@ arr = torch.Tensor(arr)
 
 # finds fitness of path
 def fitness(mat, path):
-    sum = 0
-    newpath = path.clone()
-    last_node = torch.tensor([path[0]])
-    newpath = torch.cat((newpath, last_node), 0)
-    for i in range(len(newpath)-1):
-        start = newpath[i]-1
-        end = newpath[i+1]-1
-        if mat[start][end] == 0:
-            return 0
-        else:
-            sum += mat[start][end]
-    return sum
+    # sum = 0
+    # newpath = path.clone()
+    # last_node = torch.tensor([path[0]])
+    # newpath = torch.cat((newpath, last_node), 0)
+    newpath = torch.cat((path, path[:1]), 0) #full circle path
+    start_nodes = newpath[:-1]-1
+    end_nodes = newpath[1:]-1
+    weights = mat[start_nodes][end_nodes]
+
+    if torch.any(weights==0): #if any of the paths are 0 (impossible)
+        return 0 
+    return weights.sum().item()
+    # for i in range(len(newpath)-1):
+    #     start = newpath[i]-1
+    #     end = newpath[i+1]-1
+    #     if mat[start][end] == 0:
+    #         return 0
+    #     else:
+    #         sum += mat[start][end]
+    # return sum
 
 # creates list of paths 1 swap away from current path
 def alter(path):
