@@ -34,7 +34,7 @@ def update_vel(distances, velocities, positions, pbests_pos, gbest_pos, w, c1, c
     # possibly loses some pbest info
     return w*velocities + (c1*r1*(pbests_pos - positions)) + (c2*r2*(gbest_pos - positions))
 
-def pso(distances, n_particles=25, w=0.9, c1=0.5, c2=0.5, stagnation_limit=50): 
+def pso(distances, n_particles=50, w=0.25, c1=0.96, c2=4.31, stagnation_limit=50): 
     """
     performs pso
     """
