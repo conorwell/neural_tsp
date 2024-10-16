@@ -1,8 +1,8 @@
 import torch
 import numpy as np
 
-path = ['city1', 'city2', 'city3', 'city4']
-citylist = ['city1', 'city2', 'city3', 'city4']
+path = [1,2,3,4]
+citylist = [1,2,3,4]
 
 arr = [
     [0,2,3,6],
@@ -47,6 +47,7 @@ def sortedTechnique(e_matrix):
 
 def tabu_search(mat, max_iters=100, worsening_thresh=1.01):
     num_cities = mat.size(dim = 0)
+    func_evals = 0
     tabu_list_size = num_cities * (num_cities-1) / 2
     initial = sortedTechnique(mat)
     bestpath = initial
@@ -62,6 +63,7 @@ def tabu_search(mat, max_iters=100, worsening_thresh=1.01):
                 continue
             else:
                 newfit = fitness(mat, newpath)
+                func_evals +=1
                 # bad path is found
                 if newfit == 0:
                     perm_list.append(newpath)
@@ -79,6 +81,6 @@ def tabu_search(mat, max_iters=100, worsening_thresh=1.01):
     last_node = torch.tensor([bestpath[0]])
     bestpath = torch.cat((bestpath, last_node), 0)
     params = {'tabu_list_size': tabu_list_size, 'max_iterations': max_iters, 'worsening_threshold': worsening_thresh}
-    return {'func_evals': max_iters, 'sequence': bestpath, 'parameters':params}
+    return {'func_evals': func_evals, 'sequence': bestpath, 'parameters':params}
 
 print(tabu_search(arr))
