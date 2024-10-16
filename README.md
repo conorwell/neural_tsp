@@ -39,6 +39,7 @@ Average Distance Checks: 34,881
 Average Runtime: 76.8953 seconds
 
 Plots:
+
 <img width="638" alt="Screenshot 2024-10-15 at 10 05 44 PM" src="https://github.com/user-attachments/assets/800af325-614d-412d-adfb-1c537997e853">
 
 Particle Swarm Optimization:
