@@ -31,7 +31,7 @@ Average Memory Allocated: 2,077,634 bytes
 Average Distance Checks: 34,881
 Average Runtime: 76.8953 seconds
 
-    Plots:
+Plots:
 
 
 Particle Swarm Optimization:
@@ -41,7 +41,7 @@ Average Memory Allocated: 271,454.48 bytes
 Average Distance Checks: 4,020.6896
 Average Runtime: 12.1956 seconds
 
-    Plots:
+Plots:
 
 Ant Colony Optimization:
 
@@ -50,7 +50,7 @@ Average Memory Allocated: 25,721.4 bytes
 Average Distance Checks: 2,000 (fixed)
 Average Runtime: 132.67 seconds
 
-    Plots:
+Plots:
 
 Ant Colony Optimization with Transformer:
 
@@ -59,7 +59,8 @@ Average Memory Allocated: 290,193 bytes
 Average Distance Checks: 2,000 (fixed)
 Average Runtime: 103.899 seconds
 
-    Plots:
+Plots:
+<img width="631" alt="Screenshot 2024-10-15 at 11 13 09 PM" src="https://github.com/user-attachments/assets/719fd07f-602f-46b6-b844-4f68c9b017a0">
 
 
 Comparison Plots:
